@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from "@/lib/api-client";
+import { apiGet, apiPatch, apiPost } from "@/lib/api-client";
 
 export interface Account {
   id: string;
@@ -39,4 +39,16 @@ export function createAccount(
   payload: CreateAccountPayload,
 ): Promise<AccountResponse> {
   return apiPost<AccountResponse>("/accounts", payload);
+}
+
+export interface UpdateAccountPayload {
+  name?: string;
+  description?: string;
+}
+
+export function updateAccount(
+  id: string,
+  payload: UpdateAccountPayload,
+): Promise<AccountResponse> {
+  return apiPatch<AccountResponse>(`/accounts/${id}`, payload);
 }

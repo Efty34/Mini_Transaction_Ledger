@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from "@/lib/api-client";
+import { apiGet, apiPatch, apiPost } from "@/lib/api-client";
 
 export type EntryType = "credit" | "debit";
 
@@ -44,6 +44,17 @@ export function createEntry(
   return apiPost<LedgerEntryResponse>(
     `/accounts/${accountId}/entries`,
     payload,
+  );
+}
+
+export function updateEntryDescription(
+  accountId: string,
+  entryId: string,
+  description: string,
+): Promise<LedgerEntryResponse> {
+  return apiPatch<LedgerEntryResponse>(
+    `/accounts/${accountId}/entries/${entryId}`,
+    { description },
   );
 }
 

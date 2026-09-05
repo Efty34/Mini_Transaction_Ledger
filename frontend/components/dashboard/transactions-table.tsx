@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -10,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { LedgerEntry } from "@/lib/api/ledger";
+import { EditEntryDescriptionDialog } from "./edit-entry-description-dialog";
 import { ReverseEntryButton } from "./reverse-entry-button";
 
 interface TransactionsTableProps {
@@ -18,6 +20,7 @@ interface TransactionsTableProps {
   currency: string;
   accountId: string;
   onEntryReversed: () => void;
+  onEntryUpdated: () => void;
 }
 
 export function TransactionsTable({
@@ -26,6 +29,7 @@ export function TransactionsTable({
   currency,
   accountId,
   onEntryReversed,
+  onEntryUpdated,
 }: TransactionsTableProps) {
   return (
     <div className="flex-1 overflow-auto rounded-xl border">
@@ -67,8 +71,12 @@ export function TransactionsTable({
                 </TableCell>
                 <TableCell>
                   <Badge
-                    variant={entry.type === "credit" ? "default" : "secondary"}
-                    className="capitalize"
+                    className={cn(
+                      "capitalize",
+                      entry.type === "credit"
+                        ? "border-transparent bg-green-600 text-white dark:bg-green-500"
+                        : "border-transparent bg-red-600 text-white dark:bg-red-500",
+                    )}
                   >
                     {entry.type}
                   </Badge>
@@ -81,7 +89,14 @@ export function TransactionsTable({
                 <TableCell className="text-sm">
                   {entry.description ?? "—"}
                 </TableCell>
-                <TableCell className="text-right tabular-nums">
+                <TableCell
+                  className={cn(
+                    "text-right tabular-nums",
+                    entry.type === "credit"
+                      ? "text-green-600 dark:text-green-500"
+                      : "text-red-600 dark:text-red-500",
+                  )}
+                >
                   {entry.type === "credit" ? "+" : "-"}
                   {entry.amount.toFixed(2)} {currency}
                 </TableCell>
@@ -89,17 +104,25 @@ export function TransactionsTable({
                   {entry.balanceAfter.toFixed(2)} {currency}
                 </TableCell>
                 <TableCell className="text-right">
-                  {entry.isReversed ? (
-                    <span className="text-xs text-muted-foreground">
-                      Reversed
-                    </span>
-                  ) : (
-                    <ReverseEntryButton
+                  <div className="flex justify-end gap-1">
+                    <EditEntryDescriptionDialog
                       accountId={accountId}
                       entryId={entry.id}
-                      onReversed={onEntryReversed}
+                      currentDescription={entry.description}
+                      onUpdated={onEntryUpdated}
                     />
-                  )}
+                    {entry.isReversed ? (
+                      <span className="self-center text-xs text-muted-foreground">
+                        Reversed
+                      </span>
+                    ) : (
+                      <ReverseEntryButton
+                        accountId={accountId}
+                        entryId={entry.id}
+                        onReversed={onEntryReversed}
+                      />
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))

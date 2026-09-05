@@ -130,7 +130,7 @@ export class LedgerService {
         type: oppositeType,
         amount: original.amount,
         balanceAfter,
-        description: `Reversal of entry ${original.id}`,
+        description: `Reversal of a ${original.type} entry`,
         reversalOfId: original.id,
       });
 

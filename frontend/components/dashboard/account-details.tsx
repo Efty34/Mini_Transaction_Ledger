@@ -42,6 +42,7 @@ export function AccountDetails({
           void fetchEntries();
           onAccountChanged();
         }}
+        onAccountUpdated={onAccountChanged}
       />
 
       <TransactionsTable
@@ -53,6 +54,7 @@ export function AccountDetails({
           void fetchEntries();
           onAccountChanged();
         }}
+        onEntryUpdated={() => void fetchEntries()}
       />
     </div>
   );

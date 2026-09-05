@@ -10,15 +10,18 @@ import {
 } from "@/components/ui/card";
 import type { Account } from "@/lib/api/accounts";
 import { CreateTransactionDialog } from "./create-transaction-dialog";
+import { EditAccountDialog } from "./edit-account-dialog";
 
 interface AccountSummaryCardProps {
   account: Account;
   onTransactionCreated: () => void;
+  onAccountUpdated: () => void;
 }
 
 export function AccountSummaryCard({
   account,
   onTransactionCreated,
+  onAccountUpdated,
 }: AccountSummaryCardProps) {
   return (
     <Card>
@@ -27,7 +30,8 @@ export function AccountSummaryCard({
         {account.description ? (
           <CardDescription>{account.description}</CardDescription>
         ) : null}
-        <CardAction>
+        <CardAction className="flex gap-2">
+          <EditAccountDialog account={account} onUpdated={onAccountUpdated} />
           <CreateTransactionDialog
             accountId={account.id}
             onCreated={onTransactionCreated}
