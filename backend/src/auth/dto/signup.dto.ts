@@ -4,24 +4,24 @@ import { Match } from './match.decorator';
 export class SignupDto {
   @IsString()
   @IsNotEmpty()
-  firstName: string;
+  firstName!: string;
 
   @IsString()
   @IsNotEmpty()
-  lastName: string;
+  lastName!: string;
 
   @IsString()
   @IsNotEmpty()
-  username: string;
+  username!: string;
 
   @IsEmail()
-  email: string;
+  email!: string;
 
   @IsString()
   @MinLength(8)
-  password: string;
+  password!: string;
 
   @IsString()
   @Match('password', { message: 'retypePassword must match password' })
-  retypePassword: string;
+  retypePassword!: string;
 }

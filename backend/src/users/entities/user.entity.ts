@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Role } from '../enums/role.enum';
 
 @Entity('users')
 export class User {
@@ -29,6 +30,13 @@ export class User {
   @Exclude()
   @Column()
   password!: string;
+
+  @Column({ type: 'enum', enum: Role, default: Role.USER })
+  role!: Role;
+
+  @Exclude()
+  @Column({ name: 'hashed_refresh_token', type: 'varchar', nullable: true })
+  hashedRefreshToken!: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;

@@ -85,4 +85,11 @@ export class UsersService {
     const user = await this.findOne(id);
     await this.usersRepository.remove(user);
   }
+
+  async setRefreshTokenHash(
+    id: string,
+    hashedRefreshToken: string | null,
+  ): Promise<void> {
+    await this.usersRepository.update({ id }, { hashedRefreshToken });
+  }
 }
