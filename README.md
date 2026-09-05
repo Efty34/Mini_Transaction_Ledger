@@ -161,11 +161,11 @@ the session picks up the new role.
 The project is split into two independently deployable applications that
 communicate over a REST API, plus a shared PostgreSQL database:
 
-```
-┌─────────────────┐        REST + cookies        ┌──────────────────┐        ┌────────────┐
-│   Next.js app    │ ────────────────────────────▶│    NestJS API     │───────▶│ PostgreSQL │
-│  (localhost:3001)│◀──────────────────────────── │  (localhost:3000) │        │            │
-└─────────────────┘                               └──────────────────┘        └────────────┘
+```mermaid
+flowchart LR
+    A["Next.js app<br/>(localhost:3001)"] -- "REST + cookies" --> B["NestJS API<br/>(localhost:3000)"]
+    B -- "TypeORM" --> C[("PostgreSQL")]
+    B -. "auth response<br/>(sets cookies)" .-> A
 ```
 
 The browser talks directly to the backend over HTTP with credentials

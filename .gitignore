@@ -4,3 +4,25 @@
 .env
 .env.*
 !.env.example
+
+# LaTeX build artifacts (report/report.pdf and report/report.tex are
+# committed; everything pdflatex/latexmk regenerates on build is not)
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.lof
+report/*.lot
+report/*.fls
+report/*.fdb_latexmk
+report/*.synctex.gz
+report/*.bbl
+report/*.blg
+report/*.bcf
+report/*.run.xml
+report/*.idx
+report/*.ind
+report/*.ilg
+report/*.figlist
+report/*.makefile
+report/*.auxlock
