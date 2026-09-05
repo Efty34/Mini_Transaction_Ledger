@@ -5,12 +5,13 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 
 const SALT_ROUNDS = 10;
+const FOREIGN_KEY_VIOLATION_CODES = new Set(['23503', '23001']);
 
 @Injectable()
 export class UsersService {
@@ -83,7 +84,24 @@ export class UsersService {
 
   async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
-    await this.usersRepository.remove(user);
+
+    try {
+      await this.usersRepository.remove(user);
+    } catch (error) {
+      if (
+        error instanceof QueryFailedError &&
+        FOREIGN_KEY_VIOLATION_CODES.has(
+          (error as QueryFailedError & { code?: string }).code ?? '',
+        )
+      ) {
+        throw new ConflictException(
+          'This user has accounts with ledger entries and cannot be deleted. ' +
+            'Ledger history is permanent by design.',
+        );
+      }
+
+      throw error;
+    }
   }
 
   async setRefreshTokenHash(
