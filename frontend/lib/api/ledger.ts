@@ -46,3 +46,12 @@ export function createEntry(
     payload,
   );
 }
+
+export function reverseEntry(
+  accountId: string,
+  entryId: string,
+): Promise<LedgerEntryResponse> {
+  return apiPost<LedgerEntryResponse>(
+    `/accounts/${accountId}/entries/${entryId}/reverse`,
+  );
+}

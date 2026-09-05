@@ -48,6 +48,11 @@ export function AccountDetails({
         entries={entries}
         isLoading={isLoading}
         currency={account.currency}
+        accountId={account.id}
+        onEntryReversed={() => {
+          void fetchEntries();
+          onAccountChanged();
+        }}
       />
     </div>
   );
