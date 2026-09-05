@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { decimalTransformer } from '../../common/transformers/decimal.transformer';
 import { User } from '../../users/entities/user.entity';
 
 @Entity('accounts')
@@ -22,6 +23,15 @@ export class Account {
 
   @Column({ type: 'varchar', nullable: true })
   description!: string | null;
+
+  @Column({
+    type: 'numeric',
+    precision: 15,
+    scale: 2,
+    default: 0,
+    transformer: decimalTransformer,
+  })
+  balance!: number;
 
   @Column({ name: 'user_id' })
   userId!: string;

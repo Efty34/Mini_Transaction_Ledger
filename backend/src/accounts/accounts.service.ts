@@ -1,9 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { Account } from './entities/account.entity';
+
+const FOREIGN_KEY_VIOLATION_CODES = new Set(['23503', '23001']);
 
 @Injectable()
 export class AccountsService {
@@ -50,6 +56,23 @@ export class AccountsService {
 
   async remove(id: string): Promise<void> {
     const account = await this.findOne(id);
-    await this.accountsRepository.remove(account);
+
+    try {
+      await this.accountsRepository.remove(account);
+    } catch (error) {
+      if (
+        error instanceof QueryFailedError &&
+        FOREIGN_KEY_VIOLATION_CODES.has(
+          (error as QueryFailedError & { code?: string }).code ?? '',
+        )
+      ) {
+        throw new ConflictException(
+          'This account has ledger entries and cannot be deleted. ' +
+            'Ledger history is permanent by design.',
+        );
+      }
+
+      throw error;
+    }
   }
 }
