@@ -4,9 +4,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Account } from '../../accounts/entities/account.entity';
 import { Role } from '../enums/role.enum';
 
 @Entity('users')
@@ -37,6 +39,9 @@ export class User {
   @Exclude()
   @Column({ name: 'hashed_refresh_token', type: 'varchar', nullable: true })
   hashedRefreshToken!: string | null;
+
+  @OneToMany(() => Account, (account) => account.user)
+  accounts!: Account[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
