@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
+import { UsersService } from '../users/users.service';
 import { AuthService, TokenPair } from './auth.service';
 import { CurrentRefreshUser } from './decorators/current-refresh-user.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -32,6 +33,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
+    private readonly usersService: UsersService,
   ) {}
 
   @Post('signup')
@@ -87,7 +89,8 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  me(@CurrentUser() user: AuthenticatedUser) {
+  async me(@CurrentUser() currentUser: AuthenticatedUser) {
+    const user = await this.usersService.findOne(currentUser.id);
     return { message: 'Current user retrieved successfully', data: user };
   }
 

@@ -27,6 +27,7 @@ import { UsersModule } from './users/users.module';
         NODE_ENV: Joi.string()
           .valid('development', 'production', 'test')
           .default('development'),
+        FRONTEND_URL: Joi.string().uri().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
