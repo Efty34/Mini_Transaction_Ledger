@@ -12,19 +12,23 @@ exactly what happened, in the order it happened.
 
 ## Table of contents
 
-- [Tech stack](#tech-stack)
-- [Project structure](#project-structure)
-- [Setup and run instructions](#setup-and-run-instructions)
-  - [Option A: Docker Compose](#option-a-docker-compose-recommended)
-  - [Option B: Running locally without Docker](#option-b-running-locally-without-docker)
-- [Architecture](#architecture)
-- [Database schema](#database-schema)
-- [How it works](#how-it-works)
-  - [Authentication and sessions](#authentication-and-sessions)
-  - [Roles and access control](#roles-and-access-control)
-  - [Accounts and the ledger](#accounts-and-the-ledger)
-  - [Frontend state management](#frontend-state-management)
-- [API reference](#api-reference)
+- [Mini Transaction Ledger](#mini-transaction-ledger)
+  - [Table of contents](#table-of-contents)
+  - [Tech stack](#tech-stack)
+  - [Project structure](#project-structure)
+  - [Setup and run instructions](#setup-and-run-instructions)
+  - [Architecture](#architecture)
+  - [Database schema](#database-schema)
+  - [How it works](#how-it-works)
+    - [Authentication and sessions](#authentication-and-sessions)
+    - [Roles and access control](#roles-and-access-control)
+    - [Accounts and the ledger](#accounts-and-the-ledger)
+    - [Frontend state management](#frontend-state-management)
+  - [API reference](#api-reference)
+    - [Auth (`/auth`)](#auth-auth)
+    - [Users (`/users`)](#users-users)
+    - [Accounts (`/accounts`)](#accounts-accounts)
+    - [Ledger entries (`/accounts/:accountId/entries`)](#ledger-entries-accountsaccountidentries)
 
 ## Tech stack
 
@@ -80,81 +84,85 @@ exactly what happened, in the order it happened.
 
 ## Setup and run instructions
 
-### Option A: Docker Compose (recommended)
+The only prerequisite is Docker and Docker Compose. No Node.js, pnpm, or
+PostgreSQL installation is required on the host machine — every service
+(database, API, frontend) runs inside its own container.
 
-This brings up PostgreSQL, the NestJS API, and the Next.js frontend together
-with a single command. Requires only Docker and Docker Compose installed.
+**1. Clone the repository**
 
 ```bash
-# 1. From the repository root, copy the example environment file
-cp .env.example .env
+git clone <repository-url>
+cd Mini_Transaction_Ledger
+```
 
-# 2. Build and start all three services
+**2. Copy the example environment file**
+
+```bash
+cp .env.example .env
+cat .env
+```
+
+This file supplies the database credentials, JWT secrets, and the two
+services' URLs to `docker-compose.yml`. The defaults work as-is; there is
+nothing you need to edit to get the app running.
+
+**3. Build and start all three services**
+
+```bash
 docker compose up --build
 ```
 
-Once the containers are up:
+This builds the backend and frontend images from their Dockerfiles, pulls
+the official PostgreSQL image, and starts all three containers. The first
+build takes a few minutes (installing dependencies and compiling both
+apps); subsequent runs are much faster since Docker caches unchanged
+layers.
+
+The database schema is created automatically on first boot (TypeORM
+`synchronize` is enabled for this project), so no separate migration step
+is required.
+
+**4. Open the app**
+
+Once the logs settle and the frontend reports it is ready:
 
 - Frontend: http://localhost:3001
 - Backend API: http://localhost:3000
 - PostgreSQL: localhost:5432 (credentials as set in `.env`)
 
-The database schema is created automatically on first boot (TypeORM
-`synchronize` is enabled for this project), so no separate migration step is
-required.
+Sign up for an account and use the dashboard. New signups are always
+created with the `user` role. To try the admin dashboard, promote a user
+to `admin` directly in the running database container.
 
-To stop everything:
+First, confirm the stack is up and you are in the same directory as
+`docker-compose.yml`:
+
+```bash
+docker compose ps
+```
+
+Then run the update as a single line:
+
+```bash
+docker compose exec postgres psql -U postgres -d ledger -c "UPDATE users SET role = 'admin' WHERE email = 'you@example.com';"
+```
+
+(Adjust the username/database name if you changed `DB_USERNAME` or
+`DB_NAME` in `.env`.) Confirm it took effect:
+
+```bash
+docker compose exec postgres psql -U postgres -d ledger -c "SELECT email, role FROM users;"
+```
+
+Then log out and log back in, or wait for the access token to refresh, so
+the session picks up the new role.
+
+**5. Stop the stack**
 
 ```bash
 docker compose down
-# add -v to also remove the Postgres data volume
+# add -v to also remove the Postgres data volume and start clean next time
 ```
-
-### Option B: Running locally without Docker
-
-Requires Node.js 20+, pnpm, and a running PostgreSQL instance.
-
-**1. Database**
-
-Create a PostgreSQL database and note its host, port, username, password,
-and database name.
-
-**2. Backend**
-
-```bash
-cd backend
-cp .env.example .env
-# edit .env with your database credentials and JWT secrets
-pnpm install
-pnpm start:dev
-```
-
-The API starts on `http://localhost:3000` (configurable via `PORT`).
-
-**3. Frontend**
-
-```bash
-cd frontend
-cp .env.example .env.local
-# edit .env.local if the backend is not on http://localhost:3000
-pnpm install
-pnpm dev
-```
-
-The frontend starts on `http://localhost:3001`.
-
-**4. Use the app**
-
-Open `http://localhost:3001`, sign up for an account, and use the dashboard.
-New signups are always created with the `user` role. To test the admin
-dashboard, promote a user to `admin` directly in the database:
-
-```sql
-UPDATE users SET role = 'admin' WHERE email = 'you@example.com';
-```
-
-Then log out and log back in (or wait for the access token to refresh) so
-the session picks up the new role.
 
 ## Architecture
 
